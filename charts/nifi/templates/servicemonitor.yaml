@@ -1,0 +1,43 @@
+{{- if .Values.metrics.prometheus.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "apache-nifi.fullname" . }}
+{{- with .Values.metrics.prometheus.serviceMonitor.namespace }}
+  namespace: {{ . }}
+{{- end }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "apache-nifi.name" . }}
+    app.kubernetes.io/part-of: nifi
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    helm.sh/chart: {{ include "apache-nifi.chart" . }}
+{{- if .Values.metrics.prometheus.serviceMonitor.labels }}
+{{ .Values.metrics.prometheus.serviceMonitor.labels | toYaml | indent 4 }}
+{{- end }}
+spec:
+  endpoints:
+  - port: metrics
+    path: /metrics/prometheus
+    honorLabels: true
+{{- if .Values.metrics.prometheus.serviceMonitor.interval }}
+    interval: {{ .Values.metrics.prometheus.serviceMonitor.interval }}
+{{- end }}
+{{- if .Values.metrics.prometheus.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+{{ tpl (toYaml .Values.metrics.prometheus.serviceMonitor.metricRelabelings | indent 6) . }}
+{{- end }}
+{{- if .Values.metrics.prometheus.serviceMonitor.relabelings }}
+    relabelings:
+{{ toYaml .Values.metrics.prometheus.serviceMonitor.relabelings | indent 6 }}
+{{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "apache-nifi.name" . }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace | quote }}
+{{- end }}
