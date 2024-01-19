@@ -232,7 +232,7 @@ ingress:
 
 ## Configure the Istio VirtualService
 istio:
-  enabled: true
+  enabled: false
   gateways:
     - istio-system/passthrough
 

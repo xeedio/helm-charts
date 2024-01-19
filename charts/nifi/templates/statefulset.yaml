@@ -203,6 +203,41 @@ spec:
           prop_replace nifi.remote.input.host ${FQDN}
           prop_replace nifi.web.https.host ${FQDN}
 
+          if [[ -r "{{ .Values.auth.SSL.keyPath }}" && -r "{{ .Values.auth.SSL.crtPath }}" ]]; then
+            set -x
+            CERT_FILE="{{ .Values.auth.SSL.crtPath }}"
+            KEY_FILE="{{ .Values.auth.SSL.keyPath }}"
+            KEYSTORE_PATH="{{ .Values.auth.SSL.keystorePath }}"
+            KEYSTORE_DIR=$(dirname "${KEYSTORE_PATH}")
+            KEYSTORE_TYPE="{{ .Values.auth.SSL.keystoreType }}"
+            KEYSTORE_PASSWORD="{{ .Values.auth.SSL.keystorePasswd }}"
+            PKCS12_FILE="$KEYSTORE_DIR/temp.p12"
+
+            mkdir -p "$KEYSTORE_DIR"
+
+            echo >&2 "Importing SSL keypair from ${CERT_FILE} and ${KEY_FILE}..."
+            # Convert to PKCS12 format
+            echo >&2 "Converting to PKCS12 format..."
+            openssl pkcs12 -export \
+              -in "$CERT_FILE" \
+              -inkey "$KEY_FILE" \
+              -out "$PKCS12_FILE" \
+              -name nifi \
+              -password pass:"${KEYSTORE_PASSWORD}"
+
+            echo >&2 "Converting to Java Keystore format..."
+            keytool -importkeystore \
+              -deststorepass "${KEYSTORE_PASSWORD}" \
+              -destkeystore "$KEYSTORE_FILE" \
+              -srckeystore "$PKCS12_FILE" \
+              -srcstoretype "PKCS12" \
+              -srcstorepass "${KEYSTORE_PASSWORD}" \
+              -alias nifi
+
+            rm -f "$PKCS12_FILE"
+            set +x
+          fi
+
           if [[ ! -r "{{ .Values.auth.SSL.keystorePath }}" ]]; then
             echo >&2 "{{ .Values.auth.SSL.keystorePath }} is not readable!"
             sleep 300
