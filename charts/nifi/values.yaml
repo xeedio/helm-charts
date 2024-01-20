@@ -31,6 +31,9 @@ image:
 securityContext:
   runAsUser: 1000
   fsGroup: 1000
+  sysctls:
+  - name: net.ipv4.ip_local_port_range
+    value: "10000 65000"
 
 ## Enable FIPS Mode
 fips:
@@ -53,7 +56,6 @@ sts:
   hostPort: null
   pod:
     annotations:
-      security.alpha.kubernetes.io/sysctls: net.ipv4.ip_local_port_range=10000 65000
       #prometheus.io/scrape: "true"
   serviceAccount:
     create: false
@@ -307,7 +309,7 @@ resources: {}
 logresources:
   requests:
     cpu: 10m
-    memory: 10Mi
+    memory: 20Mi
   limits:
     cpu: 50m
     memory: 50Mi

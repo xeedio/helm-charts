@@ -47,7 +47,7 @@
         <class>org.apache.nifi.authorization.FileUserGroupProvider</class>
         <property name="Users File">./auth-conf/users.xml</property>
         <property name="Legacy Authorized Users File"></property>
-        {{- if .Values.properties.webProxyHost -}}
+        {{- if .Values.properties.webProxyHost }}
         <property name="Initial User Identity WebProxyHost">CN={{ .Values.properties.webProxyHost }}</property>
         {{- end }}
         <property name="Initial User Identity CN">CN={{ .Values.certName }}</property>
@@ -62,6 +62,8 @@
         <property name="Initial User Identity admin">{{ .Values.auth.admin }}</property>
         {{- end}}
     </userGroupProvider>
+
+    {{- if .Values.auth.ldap.enabled }}
     <!--
         The LdapUserGroupProvider will retrieve users and groups from an LDAP server. The users and groups
         are not configurable.
@@ -123,7 +125,6 @@
         NOTE: Any identity mapping rules specified in nifi.properties will also be applied to the user identities.
             Group names are not mapped.
     -->
-    {{- if .Values.auth.ldap.enabled}}
     <userGroupProvider>
         <identifier>ldap-user-group-provider</identifier>
         <class>org.apache.nifi.ldap.tenants.LdapUserGroupProvider</class>
@@ -162,6 +163,7 @@
     </userGroupProvider>
     {{- end}}
 
+    {{- if .Values.auth.ldap.enabled }}
     <!--
         The CompositeUserGroupProvider will provide support for retrieving users and groups from multiple sources.
         - User Group Provider [unique key] - The identifier of user group providers to load from. The name of
@@ -170,7 +172,6 @@
             NOTE: Any identity mapping rules specified in nifi.properties are not applied in this implementation. This behavior
             would need to be applied by the base implementation.
     -->
-    {{- if .Values.auth.ldap.enabled }}
     <userGroupProvider>
         <identifier>composite-configurable-user-group-provider</identifier>
         <class>org.apache.nifi.authorization.CompositeConfigurableUserGroupProvider</class>
@@ -236,14 +237,13 @@
         <property name="Initial Admin Identity">{{ .Values.auth.admin }}</property>
         {{- end }}
         <property name="Legacy Authorized Users File"></property>
-        {{- if .Values.properties.webProxyHost -}}
+        {{- if .Values.properties.webProxyHost }}
         <property name="Node Identity WebProxyHost">CN={{ .Values.properties.webProxyHost }}</property>
         {{- end }}
         <property name="Node Identity CN">CN={{ .Values.certName }}</property>
         {{- range $i := until $replicas }}
         <property name="Node Identity {{ $i }}">CN={{ printf "node%d-%s" $i $.Values.clusterName }}</property>
         {{- end }}
-        <property name="Node Identity"></property>
     </accessPolicyProvider>
      <!--
         The StandardManagedAuthorizer. This authorizer implementation must be configured with the
@@ -257,6 +257,8 @@
         <class>org.apache.nifi.authorization.StandardManagedAuthorizer</class>
         <property name="Access Policy Provider">file-access-policy-provider</property>
     </authorizer>
+
+    {{- if .Values.auth.ldap.enabled }}
     <!--
         NOTE: This Authorizer has been replaced with the more granular approach configured above with the Standard
         Managed Authorizer. However, it is still available for backwards compatibility reasons.
@@ -280,7 +282,6 @@
             NOTE: Any identity mapping rules specified in nifi.properties will also be applied to the node identities,
             so the values should be the unmapped identities (i.e. full DN from a certificate).
     -->
-    {{- if .Values.auth.ldap.enabled}}
     <authorizer>
         <identifier>file-provider</identifier>
         <class>org.apache.nifi.authorization.FileAuthorizer</class>
@@ -289,5 +290,5 @@
         <property name="Initial Admin Identity">{{ .Values.auth.ldap.admin }}</property>
         <property name="Legacy Authorized Users File"></property>
     </authorizer>
-    {{- end}}
+    {{- end }}
 </authorizers>

@@ -100,3 +100,11 @@ Set the service account name
 {{- default "default" .Values.sts.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Sanitize name by replacing invalid characters.
+*/}}
+{{- define "apache-nifi.sanitizeName" -}}
+{{- $name := . -}}
+{{- $name | replace "." "-" | lower -}}
+{{- end -}}
