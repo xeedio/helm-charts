@@ -11,6 +11,10 @@ clusterName: test-nifi-0-0.example.com
 # Log level
 logLevel: INFO
 
+# Individual loggers can be set to a specific level
+loggers: {}
+  #  org.apache.nifi.web.security: TRACE
+
 # List of extra external hosts to route to NiFi
 # extraHosts:
 #  - nifi-s2s.example.com

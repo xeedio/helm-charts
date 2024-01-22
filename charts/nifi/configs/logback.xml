@@ -116,10 +116,10 @@
         <appender-ref ref="DEPRECATION_FILE"/>
     </logger>
 
-    <logger name="org.apache.nifi" level="{{ .Values.logLevel }}"/>
+    <logger name="org.apache.nifi" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi") }}"/>
     <logger name="org.apache.nifi.processors" level="WARN"/>
-    <logger name="org.apache.nifi.processors.standard.LogAttribute" level="{{ .Values.logLevel }}"/>
-    <logger name="org.apache.nifi.processors.standard.LogMessage" level="{{ .Values.logLevel }}"/>
+    <logger name="org.apache.nifi.processors.standard.LogAttribute" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.processors.standard.LogAttribute") }}"/>
+    <logger name="org.apache.nifi.processors.standard.LogMessage" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.processors.standard.LogMessage") }}"/>
     <logger name="org.apache.nifi.controller.repository.StandardProcessSession" level="WARN" />
     <logger name="org.apache.nifi.remote.StandardRemoteProcessGroup" level="WARN" />
 
@@ -138,20 +138,20 @@
     <logger name="org.apache.curator.ConnectionState" level="OFF" />
 
     <!-- Logger for managing logging statements for nifi clusters. -->
-    <logger name="org.apache.nifi.cluster" level="{{ .Values.logLevel }}"/>
+    <logger name="org.apache.nifi.cluster" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.cluster") }}"/>
 
     <!-- Logger for logging HTTP requests received by the web server. -->
-    <logger name="org.apache.nifi.server.JettyServer" level="{{ .Values.logLevel }}"/>
+    <logger name="org.apache.nifi.server.JettyServer" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.server.JettyServer") }}"/>
 
     <!-- Logger for managing logging statements for jetty -->
-    <logger name="org.eclipse.jetty" level="{{ .Values.logLevel }}"/>
+    <logger name="org.eclipse.jetty" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.eclipse.jetty") }}"/>
 
     <!-- Logger for managing logging statements for bouncy castle -->
-    <logger name="org.bouncycastle.jsse.level" level="{{ .Values.logLevel }}"/>
+    <logger name="org.bouncycastle.jsse.level" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.bouncycastle.jsse.level") }}"/>
 
     <!-- Suppress non-error messages due to excessive logging by class or library -->
     <logger name="org.springframework" level="ERROR"/>
-    <logger name="org.springframework.security" level="{{ .Values.logLevel }}"/>
+    <logger name="org.springframework.security" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.springframework.security") }}"/>
 
     <!-- Suppress non-error messages due to known warning about redundant path annotation (NIFI-574) -->
     <logger name="org.glassfish.jersey.internal.Errors" level="ERROR"/>
@@ -173,7 +173,7 @@
     <logger name="org.apache.atlas" level="WARN"/>
 
     <!-- These log messages would normally go to the USER_FILE log, but they belong in the APP_FILE -->
-    <logger name="org.apache.nifi.web.security.requests" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.web.security.requests" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.web.security.requests") }}" additivity="false">
         <appender-ref ref="APP_FILE"/>
     </logger>
 
@@ -182,19 +182,19 @@
         log events to the root logger. These messages are only sent to the
         user-log appender.
     -->
-    <logger name="org.apache.nifi.web.security" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.web.security" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.web.security") }}" additivity="false">
         <appender-ref ref="USER_FILE"/>
     </logger>
-    <logger name="org.apache.nifi.web.api.config" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.web.api.config" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.web.api.config") }}" additivity="false">
         <appender-ref ref="USER_FILE"/>
     </logger>
-    <logger name="org.apache.nifi.authorization" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.authorization" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.authorization") }}" additivity="false">
         <appender-ref ref="USER_FILE"/>
     </logger>
-    <logger name="org.apache.nifi.cluster.authorization" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.cluster.authorization" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.cluster.authorization") }}" additivity="false">
         <appender-ref ref="USER_FILE"/>
     </logger>
-    <logger name="org.apache.nifi.web.api.AccessResource" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.web.api.AccessResource" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.web.api.AccessResource") }}" additivity="false">
         <appender-ref ref="USER_FILE"/>
     </logger>
     <logger name="org.opensaml" level="WARN" additivity="false">
@@ -202,23 +202,23 @@
     </logger>
 
     <!-- Web Server Request Log -->
-    <logger name="org.apache.nifi.web.server.RequestLog" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.web.server.RequestLog" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.web.server.RequestLog") }}" additivity="false">
         <appender-ref ref="REQUEST_FILE"/>
     </logger>
 
     <!--
         Logger for capturing Bootstrap logs and NiFi's standard error and standard out.
     -->
-    <logger name="org.apache.nifi.bootstrap" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.bootstrap" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.bootstrap") }}" additivity="false">
         <appender-ref ref="BOOTSTRAP_FILE" />
     </logger>
-    <logger name="org.apache.nifi.bootstrap.Command" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.bootstrap.Command" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.bootstrap.Command") }}" additivity="false">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="BOOTSTRAP_FILE" />
     </logger>
 
     <!-- Everything written to NiFi's Standard Out will be logged with the logger org.apache.nifi.StdOut at {{ .Values.logLevel }} level -->
-    <logger name="org.apache.nifi.StdOut" level="{{ .Values.logLevel }}" additivity="false">
+    <logger name="org.apache.nifi.StdOut" level="{{ include "chart.loggerLevel" (dict "root" .Values.loggers "path" "org.apache.nifi.StdOut") }}" additivity="false">
         <appender-ref ref="BOOTSTRAP_FILE" />
     </logger>
 

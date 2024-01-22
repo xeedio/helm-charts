@@ -108,3 +108,14 @@ Sanitize name by replacing invalid characters.
 {{- $name := . -}}
 {{- $name | replace "." "-" | lower -}}
 {{- end -}}
+
+{{/*
+Retrieve logger level with a default fallback.
+*/}}
+{{- define "chart.loggerLevel" -}}
+{{- $root := .root -}}
+{{- $path := .path -}}
+{{- $defaultLogLevel := $root.logLevel | default "INFO" -}}
+{{- $level := dig $path 0 $root | default $defaultLogLevel -}}
+{{- $level -}}
+{{- end -}}
