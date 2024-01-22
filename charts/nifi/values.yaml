@@ -129,6 +129,7 @@ properties:
     hostCount:  # Set hostCount to indicate the number of hosts to use for site-to-site
   safetyValve:
     nifi.ui.banner.text: NiFi Deployment
+  adminGroup:  # Set the name of the initial admin group
 
 # Nifi User Authentication
 auth:

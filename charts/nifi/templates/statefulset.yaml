@@ -261,11 +261,83 @@ spec:
              exit 0;
           }
 
+          ntk-cli() {
+            /opt/nifi/nifi-toolkit-current/bin/cli.sh "$@" -p "$HOME/.nifi-cli.config"
+            return $?
+          }
+
           trap executeTrap TERM HUP INT;
           trap ":" EXIT
 
           exec bin/nifi.sh run & nifi_pid="$!"
           echo NiFi running with PID ${nifi_pid}.
+
+{{- if .Values.properties.adminGroup }}
+          if [[ "$HOSTNAME" == "nifi-0" ]]; then
+            echo >&2 "Waiting for NiFi to start..."
+            sleep 60
+
+            until ntk-cli nifi current-user &>/dev/null; do
+              echo -n "."
+              sleep 10
+            done
+
+            echo >&2 "NiFI is accepting API requests"
+
+            if ! ntk-cli nifi list-user-groups |\
+              grep -q '{{ .Values.properties.adminGroup }}'; then
+              echo >&2 "Creating admin group {{ .Values.properties.adminGroup }}..."
+              ntk-cli nifi create-user-group --userGroupName '{{ .Values.properties.adminGroup }}'
+
+              # Get the root process group id
+              pg_root=$(ntk-cli nifi get-root-id)
+
+              # Declare the resources that the admin group should have access to
+              READ_RESOURCES=(
+                controller
+                counters
+                flow
+                parameter-contexts
+                policies
+                provenance
+                system
+                tenants
+                process-groups/${pg_root}
+              )
+
+              WRITE_RESOURCES=(
+                controller
+                counters
+                parameter-contexts
+                policies
+                restricted-components
+                tenants
+                process-groups/${pg_root}
+              )
+
+              # Add the admin group to the read and write policies for the resources
+              for resource in "${READ_RESOURCES[@]}"; do
+                echo >&2 "Adding admin read access to $resource"
+                ntk-cli nifi update-policy \
+                  --accessPolicyAction read \
+                  --accessPolicyResource "$resource" \
+                  --groupNameList '{{ .Values.properties.adminGroup }}'
+              done
+
+              for resource in "${WRITE_RESOURCES[@]}"; do
+                echo >&2 "Adding admin write access to $resource"
+                ntk-cli nifi update-policy \
+                  --accessPolicyAction write \
+                  --accessPolicyResource "$resource" \
+                  --groupNameList '{{ .Values.properties.adminGroup }}'
+              done
+            else
+              echo >&2 "Admin group {{ .Values.properties.adminGroup }} already exists"
+            fi
+          fi
+          echo >&2 "Done configuring admin group"
+{{- end }}
+
           wait ${nifi_pid}
           echo >&2 "NiFi exited with status $?"
           sleep 300
@@ -389,6 +461,9 @@ spec:
           - name: "zookeeper-properties"
             mountPath: /opt/nifi/nifi-current/conf/zookeeper.properties
             subPath: "zookeeper.properties"
+          - name: "nifi-cli-config"
+            mountPath: /home/nifi/.nifi-cli.config
+            subPath: "nifi-cli.config"
 {{- if .Values.fips.enabled }}
           - name: "java-security"
             mountPath: /opt/nifi/nifi-current/conf/java.security
@@ -519,6 +594,12 @@ spec:
           items:
             - key: "zookeeper.properties"
               path: "zookeeper.properties"
+      - name: "nifi-cli-config"
+        configMap:
+          name: {{ template "apache-nifi.fullname" . }}-config
+          items:
+            - key: "nifi-cli.config"
+              path: "nifi-cli.config"
 {{- if .Values.fips.enabled }}
       - name: "java-security"
         configMap:
