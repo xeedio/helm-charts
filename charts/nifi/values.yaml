@@ -246,7 +246,7 @@ istio:
 # Separate image for tailing each log separately and checking zookeeper connectivity
 sidecar:
   image: busybox
-  tag: "1.32.0"
+  tag: "1.36.1"
   imagePullPolicy: "IfNotPresent"
 
 ## Enable persistence using Persistent Volume Claims
